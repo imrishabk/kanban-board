@@ -1,13 +1,24 @@
 {
   "name": "server",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@prisma/client": "catalog:"
+  },
+  "devDependencies": {
+    "@types/dotenv": "catalog:",
+    "@types/express": "catalog:",
+    "@types/node": "catalog:",
+    "dotenv": "catalog:",
+    "express": "catalog:",
+    "prisma": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "^7.0.2"
   }
 }
