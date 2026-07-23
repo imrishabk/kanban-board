@@ -9,7 +9,9 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@prisma/client": "catalog:"
+    "@prisma/adapter-pg": "catalog:",
+    "@prisma/client": "catalog:",
+    "pg": "catalog:"
   },
   "devDependencies": {
     "@types/dotenv": "catalog:",
