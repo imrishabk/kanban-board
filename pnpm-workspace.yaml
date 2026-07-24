@@ -8,9 +8,11 @@ catalogMode: prefer
 catalog:
   "@prisma/adapter-pg": ^7.9.0
   "@prisma/client": ^7.9.0
+  "@types/cookie-parser": ^1.4.10
   "@types/dotenv": ^8.2.3
   "@types/express": ^5.0.6
   "@types/node": ^24.13.3
+  cookie-parser: ^1.4.7
   dotenv: ^17.4.2
   express: ^5.2.1
   pg: ^8.22.0
