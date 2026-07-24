@@ -1,11 +1,15 @@
 import express, { type Express, type Request, type Response } from "express";
 import { loadEnvironmentVariable } from "./config/env";
+import cookieParser from "cookie-parser";
 
 // This will load the environment variable
 loadEnvironmentVariable();
 
 // Initialize express application;
 const app: Express = express();
+
+// Use cookie parser
+app.use(cookieParser());
 
 // Default response to the backend api
 app.get("/", (_req: Request, res: Response) => {

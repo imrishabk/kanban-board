@@ -11,9 +11,11 @@
   "dependencies": {
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
+    "cookie-parser": "catalog:",
     "pg": "catalog:"
   },
   "devDependencies": {
+    "@types/cookie-parser": "catalog:",
     "@types/dotenv": "catalog:",
     "@types/express": "catalog:",
     "@types/node": "catalog:",
