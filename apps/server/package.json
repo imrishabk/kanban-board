@@ -11,10 +11,12 @@
   "dependencies": {
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
+    "bcrypt": "catalog:",
     "cookie-parser": "catalog:",
     "pg": "catalog:"
   },
   "devDependencies": {
+    "@types/bcrypt": "catalog:",
     "@types/cookie-parser": "catalog:",
     "@types/dotenv": "catalog:",
     "@types/express": "catalog:",

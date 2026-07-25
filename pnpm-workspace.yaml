@@ -8,10 +8,12 @@ catalogMode: prefer
 catalog:
   "@prisma/adapter-pg": ^7.9.0
   "@prisma/client": ^7.9.0
+  "@types/bcrypt": ^6.0.0
   "@types/cookie-parser": ^1.4.10
   "@types/dotenv": ^8.2.3
   "@types/express": ^5.0.6
   "@types/node": ^24.13.3
+  bcrypt: ^6.0.0
   cookie-parser: ^1.4.7
   dotenv: ^17.4.2
   express: ^5.2.1
@@ -30,5 +32,6 @@ peerDependencyRules:
     vite: "*"
 allowBuilds:
   "@prisma/engines": set this to true or false
+  bcrypt: set this to true or false
   esbuild: set this to true or false
   prisma: set this to true or false
