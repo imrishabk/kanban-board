@@ -2,6 +2,8 @@ import type { Request, Response, NextFunction } from "express";
 import { authRepository } from "./auth.repository";
 import { authUtil } from "./auth.util";
 import type { Sessions, Tokens } from "../../generated/prisma/client";
+import { authService } from "./auth.service";
+import { CredentialExpired, InvalidCredential } from "./auth.errors";
 
 type AuthResult = { kind: "session"; record: Sessions } | { kind: "token"; record: Tokens } | null;
 
@@ -30,19 +32,19 @@ async function resolveAuth(req: Request): Promise<AuthResult> {
 }
 
 export const authMiddleware = {
-  async authenticate(req: Request, res: Response, next: NextFunction) {
+  async authenticate(req: Request, _res: Response, next: NextFunction) {
     const auth = await resolveAuth(req);
     if (!auth) {
-      return res.status(401).json({ error: "No valid credentials provided!" });
+      throw new InvalidCredential();
     }
     const { kind, record } = auth;
     if (isRecordExpired(record)) {
       if (kind === "session") {
-        await authRepository.updateSessionExpiry(record.sessionId, { isExpired: true });
+        await authService.expireSession(record.sessionId);
       } else {
-        await authRepository.updateTokenExpiry(record.tokenId, { isExpired: true });
+        await authService.expireToken(record.tokenId);
       }
-      return res.status(401).json({ error: "Credentials have expired!" });
+      throw new CredentialExpired();
     }
     next();
   },
