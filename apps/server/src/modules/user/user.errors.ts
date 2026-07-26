@@ -23,3 +23,9 @@ export class DuplicateUsername extends AppError {
     );
   }
 }
+
+export class InvalidCredentials extends AppError {
+  constructor() {
+    super(`Invalid credentials!`, 401, true, ErrorCode.INVALID_CREDENTIALS);
+  }
+}

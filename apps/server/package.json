@@ -13,13 +13,17 @@
     "@prisma/client": "catalog:",
     "bcrypt": "catalog:",
     "cookie-parser": "catalog:",
-    "pg": "catalog:"
+    "express-rate-limit": "catalog:",
+    "morgan": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bcrypt": "catalog:",
     "@types/cookie-parser": "catalog:",
     "@types/dotenv": "catalog:",
     "@types/express": "catalog:",
+    "@types/morgan": "catalog:",
     "@types/node": "catalog:",
     "dotenv": "catalog:",
     "express": "catalog:",

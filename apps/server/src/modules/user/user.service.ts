@@ -1,11 +1,18 @@
 import { AppError } from "../../common/errors/AppError";
 import { ErrorCode } from "../../common/errors/errorCodes";
-import { DuplicateEmail, DuplicateUsername, UserNotFound } from "./user.errors";
+import { DuplicateEmail, DuplicateUsername, UserNotFound, InvalidCredentials } from "./user.errors";
 import { userRepository } from "./user.repository";
 import { userUtil } from "./user.util";
+import { Role } from "../../generated/prisma/client";
 
 export const userService = {
-  async createUser(username: string, email: string, password: string, displayName: string) {
+  async createUser(
+    username: string,
+    email: string,
+    password: string,
+    displayName: string,
+    role?: Role,
+  ) {
     if (!username || username.trim().length === 0) {
       throw new AppError("Username is required!", 400, true, ErrorCode.MISSING_FIELD);
     }
@@ -36,6 +43,7 @@ export const userService = {
       password: hashedPassword,
       displayName: displayName.trim(),
       isActive: true,
+      role,
     });
     return user;
   },
@@ -51,7 +59,10 @@ export const userService = {
     return user;
   },
 
-  async getAllUsers() {
+  async getAllUsers(limit?: number, offset?: number) {
+    if (limit !== undefined && offset !== undefined) {
+      return userRepository.findByPagination(limit, offset, true);
+    }
     return userRepository.findAll(true);
   },
 
@@ -79,7 +90,13 @@ export const userService = {
 
   async updateUser(
     id: string,
-    data: { username?: string; email?: string; password?: string; displayName?: string },
+    data: {
+      username?: string;
+      email?: string;
+      password?: string;
+      displayName?: string;
+      role?: Role;
+    },
   ) {
     if (!id) {
       throw new AppError("User id is required!", 400, true, ErrorCode.MISSING_FIELD);
@@ -120,12 +137,85 @@ export const userService = {
       email?: string;
       password?: string;
       displayName?: string;
+      role?: Role;
     } = {};
     if (data.username !== undefined) updateData.username = data.username.trim();
     if (data.email !== undefined) updateData.email = data.email.trim();
     if (data.displayName !== undefined) updateData.displayName = data.displayName.trim();
     if (data.password !== undefined)
       updateData.password = await userUtil.hashPassword(data.password);
+    if (data.role !== undefined) updateData.role = data.role;
+
+    return userRepository.update(id, updateData);
+  },
+
+  async updateUserWithPasswordCheck(
+    id: string,
+    data: {
+      username?: string;
+      email?: string;
+      displayName?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    },
+  ) {
+    if (!id) {
+      throw new AppError("User id is required!", 400, true, ErrorCode.MISSING_FIELD);
+    }
+    const existing = await userRepository.findById(id);
+    if (!existing) {
+      throw new UserNotFound(`with id ${id}`);
+    }
+
+    if (data.newPassword) {
+      if (!data.currentPassword) {
+        throw new AppError(
+          "Current password is required to change password!",
+          400,
+          true,
+          ErrorCode.VALIDATION_FAILED,
+        );
+      }
+      const valid = await userUtil.validateHash(existing.password, data.currentPassword);
+      if (!valid) {
+        throw new InvalidCredentials();
+      }
+    }
+
+    if (data.email !== undefined && data.email.trim().length === 0) {
+      throw new AppError("Email cannot be empty!", 400, true, ErrorCode.VALIDATION_FAILED);
+    }
+    if (data.username !== undefined && data.username.trim().length === 0) {
+      throw new AppError("Username cannot be empty!", 400, true, ErrorCode.VALIDATION_FAILED);
+    }
+    if (data.displayName !== undefined && data.displayName.trim().length === 0) {
+      throw new AppError("Display name cannot be empty!", 400, true, ErrorCode.VALIDATION_FAILED);
+    }
+
+    if (data.email !== undefined && data.email.trim() !== existing.email) {
+      const duplicateEmail = await userRepository.findByEmail(data.email.trim());
+      if (duplicateEmail) {
+        throw new DuplicateEmail(data.email.trim());
+      }
+    }
+    if (data.username !== undefined && data.username.trim() !== existing.username) {
+      const duplicateUsername = await userRepository.findByUsername(data.username.trim());
+      if (duplicateUsername) {
+        throw new DuplicateUsername(data.username.trim());
+      }
+    }
+
+    const updateData: {
+      username?: string;
+      email?: string;
+      password?: string;
+      displayName?: string;
+    } = {};
+    if (data.username !== undefined) updateData.username = data.username.trim();
+    if (data.email !== undefined) updateData.email = data.email.trim();
+    if (data.displayName !== undefined) updateData.displayName = data.displayName.trim();
+    if (data.newPassword !== undefined)
+      updateData.password = await userUtil.hashPassword(data.newPassword);
 
     return userRepository.update(id, updateData);
   },

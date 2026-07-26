@@ -1,7 +1,7 @@
 import { prisma } from "../../config/database";
 
 export const columnRepository = {
-  async create(data: { title: string; boardId: string }) {
+  async create(data: { title: string; boardId: string; position: number }) {
     return prisma.columns.create({ data });
   },
 
@@ -18,14 +18,26 @@ export const columnRepository = {
   },
 
   async findByBoardId(boardId: string) {
-    return prisma.columns.findMany({ where: { boardId } });
+    return prisma.columns.findMany({
+      where: { boardId },
+      orderBy: { position: "asc" },
+    });
   },
 
   async findById(id: string) {
     return prisma.columns.findUnique({ where: { id } });
   },
 
-  async update(id: string, data: Partial<{ title: string }>) {
+  async getMaxPosition(boardId: string): Promise<number> {
+    const column = await prisma.columns.findFirst({
+      where: { boardId },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
+    return column?.position ?? 0;
+  },
+
+  async update(id: string, data: Partial<{ title: string; position: number }>) {
     return prisma.columns.update({ where: { id }, data });
   },
 

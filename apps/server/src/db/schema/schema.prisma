@@ -7,14 +7,21 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  ADMIN
+  SERVER
+}
+
 model Boards {
   id        String    @id @default(cuid())
   title     String
   owner     Users?    @relation(fields: [ownerId], references: [id])
   ownerId   String?   @default("SERVER")
-  group     Groups?   @relation(fields: [groupId], references: [id])
+  group     Groups?   @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   groupId   String?   @default("SERVER")
   columns   Columns[]
+  taskLabels TaskLabel[]
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
@@ -24,6 +31,7 @@ model Boards {
 model Columns {
   id        String   @id @default(cuid())
   title     String
+  position  Int      @default(0)
   tasks     Tasks[]
   boards    Boards   @relation(fields: [boardId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   boardId   String   @map("board_id")
@@ -34,15 +42,58 @@ model Columns {
 }
 
 model Tasks {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
   description String?
-  columns     Columns  @relation(fields: [columnId], references: [id], onDelete: Cascade)
-  columnId    String   @map("column_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  position    Int          @default(0)
+  dueDate     DateTime?    @map("due_date")
+  assignee    Users?       @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigneeId  String?      @map("assignee_id")
+  labels      TaskLabelTask[]
+  comments    TaskComment[]
+  columns     Columns      @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  columnId    String       @map("column_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
 
   @@map("tasks")
+}
+
+model TaskLabel {
+  id        String          @id @default(cuid())
+  title     String
+  color     String          @default("#6366f1")
+  boardId   String          @map("board_id")
+  board     Boards          @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks     TaskLabelTask[]
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  @@unique([boardId, title])
+  @@map("task_labels")
+}
+
+model TaskLabelTask {
+  task      Tasks     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    String    @map("task_id")
+  label     TaskLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  labelId   String    @map("label_id")
+
+  @@id([taskId, labelId])
+  @@map("task_label_tasks")
+}
+
+model TaskComment {
+  id        String  @id @default(cuid())
+  content   String
+  task      Tasks   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId    String  @map("task_id")
+  author    Users   @relation("TaskCommentAuthor", fields: [authorId], references: [id])
+  authorId  String  @map("author_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("task_comments")
 }
 
 model Users {
@@ -51,10 +102,13 @@ model Users {
   email       String     @unique
   password    String
   displayName String     @map("display_name")
-  groups      Groups[]
+  role        Role       @default(USER)
+  groups      Groups[]   @relation("GroupMembers")
   sessions    Sessions[]
   tokens      Tokens[]
   boards      Boards[]
+  assignedTasks Tasks[] @relation("TaskAssignee")
+  taskComments  TaskComment[] @relation("TaskCommentAuthor")
   isActive    Boolean    @map("is_active")
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
@@ -64,12 +118,13 @@ model Users {
 
 model Groups {
   id        String   @id @default(cuid())
+  title     String
   ownerId   String   @map("owner_id")
-  members   Users[]
+  members   Users[]  @relation("GroupMembers")
   tokens    Tokens[]
   boards    Boards[]
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("groups")
 }
