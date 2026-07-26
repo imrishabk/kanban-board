@@ -17,8 +17,8 @@ export const taskRepository = {
         ...taskData,
         labels: labelIds
           ? {
-              create: labelIds.map((labelId) => ({ label: { connect: { id: labelId } } })),
-            }
+            create: labelIds.map((labelId) => ({ label: { connect: { id: labelId } } })),
+          }
           : undefined,
       },
     });
