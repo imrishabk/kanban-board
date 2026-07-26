@@ -8,17 +8,23 @@ catalogMode: prefer
 catalog:
   "@prisma/adapter-pg": ^7.9.0
   "@prisma/client": ^7.9.0
+  "@types/bcrypt": ^6.0.0
   "@types/cookie-parser": ^1.4.10
   "@types/dotenv": ^8.2.3
   "@types/express": ^5.0.6
+  "@types/morgan": ^1.9.9
   "@types/node": ^24.13.3
+  bcrypt: ^6.0.0
   cookie-parser: ^1.4.7
   dotenv: ^17.4.2
   express: ^5.2.1
+  "express-rate-limit": ^7.4.0
+  morgan: ^1.10.0
   pg: ^8.22.0
   prisma: ^7.9.0
   tsx: ^4.23.1
   typescript: ^7.0.2
+  zod: ^3.23.0
   vite: npm:@voidzero-dev/vite-plus-core@0.2.5
   vite-plus: 0.2.5
 overrides:
@@ -30,5 +36,6 @@ peerDependencyRules:
     vite: "*"
 allowBuilds:
   "@prisma/engines": set this to true or false
+  bcrypt: set this to true or false
   esbuild: set this to true or false
   prisma: set this to true or false

@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { userRepository } from "../user/user.repository";
 import { authRepository } from "./auth.repository";
 import { authUtil } from "./auth.util";
 import type { Sessions, Tokens } from "../../generated/prisma/client";
@@ -46,6 +47,18 @@ export const authMiddleware = {
       }
       throw new CredentialExpired();
     }
+
+    // Attach user to request
+    const userId = record.userId;
+    if (!userId) {
+      throw new InvalidCredential();
+    }
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new InvalidCredential();
+    }
+    (req as any).user = user;
+
     next();
   },
 };

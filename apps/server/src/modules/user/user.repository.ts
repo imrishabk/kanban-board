@@ -1,4 +1,5 @@
 import { prisma } from "../../config/database";
+import { Role } from "../../generated/prisma/client";
 
 export const userRepository = {
   async create(data: {
@@ -7,6 +8,7 @@ export const userRepository = {
     password: string;
     displayName: string;
     isActive: boolean;
+    role?: Role;
   }) {
     return prisma.users.create({ data });
   },
@@ -36,7 +38,13 @@ export const userRepository = {
 
   async update(
     id: string,
-    data: Partial<{ username: string; email: string; password: string; displayName: string }>,
+    data: Partial<{
+      username: string;
+      email: string;
+      password: string;
+      displayName: string;
+      role: Role;
+    }>,
   ) {
     return prisma.users.update({ where: { id }, data });
   },

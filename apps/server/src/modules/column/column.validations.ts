@@ -1,34 +1,46 @@
 import { z } from "zod";
 
-export const createBoardSchema = z.object({
+export const createColumnSchema = z.object({
   body: z.object({
     title: z.string().min(1).max(200),
-    groupId: z.string().cuid().optional(),
+    boardId: z.string().cuid(),
   }),
 });
 
-export const updateBoardSchema = z.object({
+export const updateColumnSchema = z.object({
   params: z.object({
     id: z.string().cuid(),
   }),
   body: z.object({
     title: z.string().min(1).max(200).optional(),
-    groupId: z.string().cuid().nullable().optional(),
   }),
 });
 
-export const transferBoardSchema = z.object({
+export const columnIdParamSchema = z.object({
   params: z.object({
     id: z.string().cuid(),
-  }),
-  body: z.object({
-    newOwnerId: z.string().cuid(),
   }),
 });
 
 export const boardIdParamSchema = z.object({
   params: z.object({
-    id: z.string().cuid(),
+    boardId: z.string().cuid(),
+  }),
+});
+
+export const reorderColumnsSchema = z.object({
+  params: z.object({
+    boardId: z.string().cuid(),
+  }),
+  body: z.object({
+    columns: z
+      .array(
+        z.object({
+          id: z.string().cuid(),
+          position: z.number().int().min(0),
+        }),
+      )
+      .min(1),
   }),
 });
 
